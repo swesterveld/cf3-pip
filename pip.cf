@@ -1,0 +1,32 @@
+### pip.cf
+#
+# Contents for library.cf
+#
+body package_method sara_pip
+{
+}
+
+body package_method sara_pip_requirements(requirements_file)
+{
+}
+    
+body package_method sara_pip_virtualenv(envdir)
+{   
+    package_changes => "individual";
+    package_list_command => "$(envdir)/bin/pip freeze";
+    package_list_update_ifelapsed => 0;
+
+    package_list_name_regex => "^([^=]+)==.+$";
+    package_list_version_regex => "^[^=]+==(.+)$";
+
+    package_installed_regex => ".*";
+    package_name_convention => "$(name)==$(version)";
+
+    package_add_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip install";
+    package_update_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip install --upgrade";
+    package_delete_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip uninstall --yes";
+}
+
+body package_method sara_pip_virtualenv_requirements(requirements_file)
+{
+}

@@ -1,0 +1,14 @@
+### promises.cf
+#
+# Main Cfengine 3 configuration file
+#
+body common control
+{
+    bundlesequence => { pypi_packages };
+
+    inputs => {
+        "cfengine_stdlib.cf",
+        "packages.cf",
+        "pip.cf",
+    };
+}

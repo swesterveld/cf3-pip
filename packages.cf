@@ -1,0 +1,26 @@
+### packages.cf
+#
+# Packages are defined in the following form:
+# "pypi[<pkg-name>]" string => "<pkg-version>";
+bundle agent pypi_packages
+{
+    vars:
+        "pypi[yolk]"    string  => "0.4.2";
+        "pypi[IPy]"     string  => "0.74";
+
+        "pip_install"   slist   => getindices("pypi");
+
+    files:
+    # Check if pip is installed
+
+    packages:
+
+        any::
+
+            "$(pip_install)"
+
+                package_method => sara_pip("/data/virtualenvs/test");
+                package_policy => "addupdate",
+                package_select => "==",
+                package_version => "$(pypi[$(pip_install)])",
+}
