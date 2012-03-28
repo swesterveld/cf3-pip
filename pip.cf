@@ -1,19 +1,18 @@
 ### pip.cf
 #
-# Contents for library.cf
+# Contents for your CFEngine library.
 #
+# Some notes:
+#
+#   * We assume pip has been globally installed to /usr/local/bin/pip
+#   * Some of the bodies depend on the tool virtualenv, which can be globally
+#     installed with pip.
+#
+
 body package_method sara_pip
 {
-}
-
-body package_method sara_pip_requirements(requirements_file)
-{
-}
-    
-body package_method sara_pip_virtualenv(envdir)
-{   
-    package_changes => "individual";
-    package_list_command => "$(envdir)/bin/pip freeze";
+    package_changes => "bulk";
+    package_list_command => "/usr/local/bin/pip freeze";
     package_list_update_ifelapsed => 0;
 
     package_list_name_regex => "^([^=]+)==.+$";
@@ -21,12 +20,25 @@ body package_method sara_pip_virtualenv(envdir)
 
     package_installed_regex => ".*";
     package_name_convention => "$(name)==$(version)";
+    package_delete_convention => "$(name)";
 
-    package_add_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip install";
-    package_update_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip install --upgrade";
-    package_delete_command => "/usr/local/bin/virtualenv $(envdir) && $(virtualenv)/bin/pip uninstall --yes";
+    package_add_command => "/usr/local/bin/pip install";
+    package_delete_command => "/usr/local/bin/pip uninstall --yes";
 }
 
-body package_method sara_pip_virtualenv_requirements(requirements_file)
-{
+body package_method sara_pip_virtualenv(envdir)
+{   
+    package_changes => "bulk";
+    package_list_command => "$(envdir)/bin/pip freeze"; # wrong command
+    package_list_update_ifelapsed => 0;
+
+    package_list_name_regex => "^([^=]+)==.+$";
+    package_list_version_regex => "^[^=]+==(.+)$";
+
+    package_installed_regex => ".*";
+    package_name_convention => "$(name)==$(version)";
+    package_delete_convention => "$(name)";
+
+    package_add_command => "/usr/local/bin/virtualenv $(envdir) && $(envdir)/bin/pip install";
+    package_delete_command => "/usr/local/bin/virtualenv $(envdir) && $(envdir)/bin/pip uninstall --yes";
 }

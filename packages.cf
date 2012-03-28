@@ -1,17 +1,31 @@
 ### packages.cf
 #
-# Packages are defined in the following form:
-# "pypi[<pkg-name>]" string => "<pkg-version>";
-bundle agent pypi_packages
+# Packages to install are defined in an array, with desired version numbers:
+# "pkgadd[<package>]" string => "<version>";
+#
+# For example:
+#
+# "pkgadd[yolk]"    string  => "0.4.3";
+# "pkgadd[IPy]"     string  => "0.75";
+#
+# Location of our virtual environments is saved in variable VIRTUALENVS.
+
+bundle agent pip_example
 {
     vars:
-        "pypi[yolk]"    string  => "0.4.2";
-        "pypi[IPy]"     string  => "0.74";
 
-        "pip_install"   slist   => getindices("pypi");
+        "VIRTUALENVS"   string  => "/data/virtualenvs/";
 
-    files:
-    # Check if pip is installed
+        "pkgadd[yolk]"  string  => "0.4.3";
+        "pkgadd[IPy]"   string  => "0.75";
+
+        "pip_install"   slist   => getindices("pkgadd");
+
+        "pip_delete"    slist   => {
+            "Django",
+            "pypid",
+        };
+
 
     packages:
 
@@ -19,8 +33,17 @@ bundle agent pypi_packages
 
             "$(pip_install)"
 
-                package_method => sara_pip("/data/virtualenvs/test");
-                package_policy => "addupdate",
+                comment => "Install a Python package in a virtual environment",
+
+                package_method => sara_pip_virtualenv("$(VIRTUALENVS)/test"),
+                package_policy => "add",
                 package_select => "==",
-                package_version => "$(pypi[$(pip_install)])",
+                package_version => "$(pkgadd[$(pip_install)])";
+
+            "$(pip_delete)"
+
+                comment => "Delete a Python package from a virtual environment",
+
+                package_method => sara_pip_virtualenv("$(VIRTUALENVS)/test"),
+                package_policy => "delete";
 }

@@ -4,7 +4,7 @@
 #
 body common control
 {
-    bundlesequence => { pypi_packages };
+    bundlesequence => { pip_example };
 
     inputs => {
         "cfengine_stdlib.cf",

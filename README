@@ -1,0 +1,18 @@
+The cf3-pip repo contains an extension written for the CFEngine 3 library. Goal
+was to have a means to easily manage Python packages from a CFEngine setup.
+
+With this extension Python package manager 'pip' -- which is an acronym for
+'pip installs packages' -- is supported as one of the package managers
+available in CFEngine. It makes it possible to install and remove Python
+packages globally as well as in a virtual environment. For the latter you'll
+need an environment with the Python package 'virtualenv'.
+
+
+The extension itself can be found in the file 'pip.cf'.
+
+An example of how to use the extension can be found in the example-directory.
+To try it yourself, you should copy these files, together with 'pip.cf' and the
+CFEngine 3 standard library ('cfengine_stdlib.cf') to a single directory, and
+issue the following command from that directory:
+
+    cf-agent -v -K -f ./promises.cf
