@@ -2,17 +2,15 @@
 #
 # Contents for your CFEngine library.
 #
-# Some notes:
-#
-#   * We assume pip has been globally installed to /usr/local/bin/pip
-#   * Some of the bodies depend on the tool virtualenv, which can be globally
-#     installed with pip.
-#
 
-body package_method sara_pip
+
+#
+# Let pip install a Python package globally
+#
+body package_method sara_pip(PIP_CMD)
 {
     package_changes => "bulk";
-    package_list_command => "/usr/local/bin/pip freeze";
+    package_list_command => "$(PIP_CMD) freeze";
     package_list_update_ifelapsed => 0;
 
     package_list_name_regex => "^([^=]+)==.+$";
@@ -22,14 +20,18 @@ body package_method sara_pip
     package_name_convention => "$(name)==$(version)";
     package_delete_convention => "$(name)";
 
-    package_add_command => "/usr/local/bin/pip install";
-    package_delete_command => "/usr/local/bin/pip uninstall --yes";
+    package_add_command => "$(PIP_CMD) install";
+    package_delete_command => "$(PIP_CMD) uninstall --yes";
 }
 
-body package_method sara_pip_virtualenv(envdir)
-{   
+
+#
+# Let pip install a Python package in the virtual environment ENVDIR
+#
+body package_method sara_pip_virtualenv(VIRTUALENV_CMD, ENVDIR)
+{
     package_changes => "bulk";
-    package_list_command => "$(envdir)/bin/pip freeze"; # wrong command
+    package_list_command => "$(ENVDIR)/bin/pip freeze";
     package_list_update_ifelapsed => 0;
 
     package_list_name_regex => "^([^=]+)==.+$";
@@ -39,6 +41,6 @@ body package_method sara_pip_virtualenv(envdir)
     package_name_convention => "$(name)==$(version)";
     package_delete_convention => "$(name)";
 
-    package_add_command => "/usr/local/bin/virtualenv $(envdir) && $(envdir)/bin/pip install";
-    package_delete_command => "/usr/local/bin/virtualenv $(envdir) && $(envdir)/bin/pip uninstall --yes";
+    package_add_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip install";
+    package_delete_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip uninstall --yes";
 }
