@@ -57,8 +57,7 @@ bundle agent pip_example
                 comment => "Install Python package(s) in a virtual environment",
     
                 package_method => sara_pip_virtualenv($(VIRTUALENV_CMD), "$(VIRTUALENVS)/testenv"),
-                #package_method => sara_pip("$(PIP_CMD)"),
-                package_policy => "add",
+                package_policy => "addupdate",
                 package_select => "==",
                 package_version => "$(pkgadd[$(pip_install)])";
 
