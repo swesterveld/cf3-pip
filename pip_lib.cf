@@ -1,0 +1,46 @@
+### pip.cf
+#
+# Contents for your CFEngine library.
+#
+
+
+#
+# Let pip install a Python package globally
+#
+body package_method sara_pip(PIP_CMD)
+{
+    package_changes => "bulk";
+    package_list_command => "$(PIP_CMD) freeze";
+    package_list_update_ifelapsed => 0;
+
+    package_list_name_regex => "^([^=]+)==.+$";
+    package_list_version_regex => "^[^=]+==(.+)$";
+
+    package_installed_regex => ".*";
+    package_name_convention => "$(name)==$(version)";
+    package_delete_convention => "$(name)";
+
+    package_add_command => "$(PIP_CMD) install";
+    package_delete_command => "$(PIP_CMD) uninstall --yes";
+}
+
+
+#
+# Let pip install a Python package in the virtual environment ENVDIR
+#
+body package_method sara_pip_virtualenv(VIRTUALENV_CMD, ENVDIR)
+{
+    package_changes => "bulk";
+    package_list_command => "$(ENVDIR)/bin/pip freeze";
+    package_list_update_ifelapsed => 0;
+
+    package_list_name_regex => "^([^=]+)==.+$";
+    package_list_version_regex => "^[^=]+==(.+)$";
+
+    package_installed_regex => ".*";
+    package_name_convention => "$(name)==$(version)";
+    package_delete_convention => "$(name)";
+
+    package_add_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip install";
+    package_delete_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip uninstall --yes";
+}
