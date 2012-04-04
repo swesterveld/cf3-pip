@@ -8,7 +8,25 @@ body common control
 
     inputs => {
         "cfengine_stdlib.cf",
-        "packages.cf",
-        "pip.cf",
+        "pip_lib.cf",
     };
+}
+
+bundle agent pip_example
+{
+    vars:
+        any::
+            #
+            # Define the packages to install/delete
+            #
+            "pkgadd[yolk]"  string  => "0.4.3";
+
+            "pip_delete"    slist   => {
+                "dummypkg2",
+                "dummypkg3",
+            };
+
+    methods:
+        "any" usebundle => pip_install_pkg("pip_example.pkgadd");
+
 }

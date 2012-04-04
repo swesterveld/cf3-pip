@@ -3,14 +3,13 @@
 # Contents for your CFEngine library.
 #
 
-
 #
 # Let pip install a Python package globally
 #
-body package_method sara_pip(PIP_CMD)
+body package_method pip_pkg
 {
     package_changes => "bulk";
-    package_list_command => "$(PIP_CMD) freeze";
+    package_list_command => "$(pip.command) freeze";
     package_list_update_ifelapsed => 0;
 
     package_list_name_regex => "^([^=]+)==.+$";
@@ -20,15 +19,15 @@ body package_method sara_pip(PIP_CMD)
     package_name_convention => "$(name)==$(version)";
     package_delete_convention => "$(name)";
 
-    package_add_command => "$(PIP_CMD) install";
-    package_delete_command => "$(PIP_CMD) uninstall --yes";
+    package_add_command => "$(pip.command) install";
+    package_delete_command => "$(pip.command) uninstall --yes";
 }
 
 
 #
 # Let pip install a Python package in the virtual environment ENVDIR
 #
-body package_method sara_pip_virtualenv(VIRTUALENV_CMD, ENVDIR)
+body package_method pip_pkg_virtualenv(ENVDIR)
 {
     package_changes => "bulk";
     package_list_command => "$(ENVDIR)/bin/pip freeze";
@@ -44,3 +43,77 @@ body package_method sara_pip_virtualenv(VIRTUALENV_CMD, ENVDIR)
     package_add_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip install";
     package_delete_command => "$(VIRTUALENV_CMD) $(ENVDIR) && $(ENVDIR)/bin/pip uninstall --yes";
 }
+
+bundle common pip
+{
+    classes:
+        "has_pip_from_git"  expression  => fileexists("/usr/local/bin/pip");
+
+        !has_pip::
+            "has_pip"           expression  => returnszero("/usr/bin/which pip", "noshell");
+
+        !has_virtualenv::
+            "has_virtualenv"    expression  => returnszero("/usr/bin/which  virtualenv", "useshell");
+    
+    vars:
+
+        #
+        # Set the command to run pip
+        #
+        has_pip.!has_pip_from_git::
+            "command"   string  => execresult("/usr/bin/which pip", "noshell");
+ 
+        has_pip_from_git::
+            "command"   string  => "/usr/local/bin/pip";
+    
+    
+        has_virtualenv::
+            #
+            # Locations of the virtualenv-command and our virtual environments
+            #
+            "virtualenv_cmd"    string => execresult("/usr/bin/which virtualenv", "noshell");
+            "VIRTUALENVS"       string  => "/data/virtualenvs/"; #deprecated
+}
+
+
+bundle agent pip_install_pkg(pkgs_array)
+{
+    vars:
+        any::
+            "pip_install" slist => getindices($(pkgs_array));
+
+    packages:
+        has_pip::
+            "$(pip_install)"
+                comment => "Install Python package(s) in a virtual environment",
+                package_method => pip_pkg,
+                package_policy => "addupdate",
+                package_select => "==",
+                package_version => "$($(pkgs_array)[$(pip_install)])";
+    reports:
+        debian::
+            "XXX pkgs_array: $(pkgs_array)";
+            "XXX pip_install: $(pip_install)";
+}
+
+bundle agent pip_install_pkg_virtualenv(pkgs_array, virtualenv)
+{
+    vars:
+        any::
+            "pip_install" slist => getindices("pkgs_array");
+
+    packages:
+        has_pip.has_virtualenv::
+            "$(pip_install)"
+                comment => "Install Python package(s) in a virtual environment",
+                package_method => pip_pkg_virtualenv("$(virtualenv)"),
+                package_policy => "addupdate",
+                package_select => "==",
+                package_version => "$(pkg_array[$(pip_install)])";
+
+    reports:
+        debian::
+            "XXX pkgs_array: $(pkgs_array)";
+            "XXX pip_install: $(pip_install)";
+}
+
