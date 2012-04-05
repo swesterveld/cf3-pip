@@ -28,5 +28,7 @@ bundle agent pip_example
 
     methods:
         "any" usebundle => pip_install_pkg("pip_example.pkgadd");
-
+        "any" usebundle => pip_install_pkg_virtualenv("pip_example.pkgadd", "/data/virtualenvs/testenv");
+        "any" usebundle => pip_uninstall_pkg($(pip_example.pip_delete));
+        "any" usebundle => pip_uninstall_pkg_virtualenv($(pip_example.pip_delete), "/data/virtualenvs/testenv");
 }
