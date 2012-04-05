@@ -1,4 +1,4 @@
-### pip_lib.cf
+### pip.cf
 #
 # Contents for your CFEngine library.
 #
@@ -34,7 +34,7 @@ bundle common pip
 }
 
 #
-# Let pip install a Python package globally
+# Let pip manage Python packages globally
 #
 body package_method pip_pkg
 {
@@ -54,7 +54,7 @@ body package_method pip_pkg
 }
 
 #
-# Let pip install a Python package in the virtual environment envdir
+# Let pip manage Python packages in the virtual environment envdir
 #
 body package_method pip_pkg_virtualenv(envdir)
 {
